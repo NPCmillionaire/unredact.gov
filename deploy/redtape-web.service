@@ -1,0 +1,18 @@
+[Unit]
+Description=redtape web app
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=redtape
+WorkingDirectory=/opt/redtape
+EnvironmentFile=/opt/redtape/.env
+ExecStart=/opt/redtape/.venv/bin/redtape serve --host 127.0.0.1 --port 8000
+Restart=on-failure
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/redtape
+Environment=REDTAPE_DATA_DIR=/var/lib/redtape
+
+[Install]
+WantedBy=multi-user.target

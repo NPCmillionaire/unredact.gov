@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}FOIA · redtape{% endblock %}
+{% block body %}
+<div style="display:flex;justify-content:space-between;align-items:center">
+  <h1>FOIA requests</h1><a class="btn" href="/foia/new" style="margin:0">New request</a>
+</div>
+<table>
+  <tr><th>#</th><th>Token</th><th>Agency</th><th>Subject</th><th>Status</th><th>Due</th></tr>
+  {% for r in rows %}
+  <tr>
+    <td><a href="/foia/{{ r.id }}">{{ r.id }}</a></td>
+    <td>{{ r.token }}</td>
+    <td>{{ r.agency_title }}</td>
+    <td><a href="/foia/{{ r.id }}">{{ r.subject }}</a></td>
+    <td><span class="pill {{ r.status }}">{{ r.status }}</span>{% if r.id in overdue %} <span class="pill overdue">overdue</span>{% endif %}</td>
+    <td>{{ r.due_at or '—' }}</td>
+  </tr>
+  {% else %}
+  <tr><td colspan="6" class="muted">No requests yet.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

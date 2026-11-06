@@ -1,0 +1,22 @@
+{{ today }}
+
+{{ agency.title }}
+Attn: FOIA / Public Records Officer
+
+Re: Status of {{ j.short }} request {{ token }}{% if tracking_number %} (your no. {{ tracking_number }}){% endif %}
+
+Dear Records Officer:
+
+I am writing to follow up on my request submitted {{ submitted }} under {{ j.law }}, seeking:
+
+{{ description }}
+{% if due %}
+
+The statutory response period ended {{ due }}.
+{% endif %}
+Please provide the current status of this request and an estimated date of completion. If records are ready in part, I ask that you release them now on a rolling basis.
+
+Thank you,
+
+{{ requester.name }}
+{{ requester.email }}

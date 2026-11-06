@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Write Congress · redtape{% endblock %}
+{% block body %}
+<h1>Write your members of Congress</h1>
+<p class="lead">Offices only respond to constituents, so use your real name and home address.</p>
+{% if error %}<div class="error">{{ error }}</div>{% endif %}
+<form method="post" action="/congress/preview">
+  <div class="row">
+    <div><label>Prefix</label>
+      <select name="prefix" required>{% for p in prefixes %}<option {% if f.prefix == p %}selected{% endif %}>{{ p }}</option>{% endfor %}</select></div>
+    <div><label>First name</label><input type="text" name="first" required value="{{ f.first or '' }}"></div>
+    <div><label>Last name</label><input type="text" name="last" required value="{{ f.last or '' }}"></div>
+  </div>
+  <div class="row2">
+    <div><label>Email</label><input type="email" name="email" required value="{{ f.email or '' }}"></div>
+    <div><label>Phone (optional)</label><input type="tel" name="phone" value="{{ f.phone or '' }}"></div>
+  </div>
+  <label>Home address</label>
+  <input type="text" name="address" required placeholder="123 Main St, Youngstown, OH 44503" value="{{ f.address or '' }}">
+  <label>Topic</label>
+  <select name="topic"><option value="">(choose)</option>{% for t in topics %}<option {% if f.topic == t %}selected{% endif %}>{{ t }}</option>{% endfor %}</select>
+  <label>Subject</label><input type="text" name="subject" required maxlength="200" value="{{ f.subject or '' }}">
+  <label>Your message</label>
+  <textarea name="body" required placeholder="Say who you are, what you want them to do (vote yes/no on a bill, co-sponsor, investigate), and why it matters to you personally.">{{ f.body or '' }}</textarea>
+  <p class="muted">Personal messages get more attention than form letters. A greeting and your signature block are added automatically.</p>
+  <button type="submit">Find my members &amp; preview →</button>
+</form>
+{% endblock %}

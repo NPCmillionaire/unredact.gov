@@ -1,0 +1,54 @@
+# Response-deadline rules per jurisdiction.
+# VERIFY before relying on these — public-records statutes are amended often,
+# and many states measure the clock from *receipt*, not submission.
+# unit: business | calendar ; days: null = no fixed statutory deadline.
+
+federal:
+  law: "the Freedom of Information Act, 5 U.S.C. § 552"
+  short: FOIA
+  days: 20
+  unit: business
+  appeal_days: 90
+  note: "Agencies may extend 10 business days in 'unusual circumstances' (§ 552(a)(6)(B))."
+
+CA:
+  law: "the California Public Records Act, Cal. Gov. Code § 7920.000 et seq."
+  short: CPRA
+  days: 10
+  unit: calendar
+IL:
+  law: "the Illinois Freedom of Information Act, 5 ILCS 140"
+  short: FOIA
+  days: 5
+  unit: business
+NY:
+  law: "the New York Freedom of Information Law, N.Y. Pub. Off. Law §§ 84–90"
+  short: FOIL
+  days: 5
+  unit: business
+  note: "5 business days to acknowledge; production deadline is set in the acknowledgment."
+OH:
+  law: "the Ohio Public Records Act, R.C. 149.43"
+  short: public records
+  days: null
+  note: "No fixed deadline — records must be made available 'promptly' / within a reasonable time."
+PA:
+  law: "the Pennsylvania Right-to-Know Law, 65 P.S. § 67.101 et seq."
+  short: RTKL
+  days: 5
+  unit: business
+TX:
+  law: "the Texas Public Information Act, Tex. Gov't Code ch. 552"
+  short: PIA
+  days: 10
+  unit: business
+  note: "10 business days is the deadline to seek an AG ruling if withholding; release 'promptly'."
+FL:
+  law: "Florida's Public Records Act, ch. 119, Fla. Stat."
+  short: public records
+  days: null
+
+default:
+  law: "the applicable state public records law"
+  short: public records
+  days: null

@@ -1,0 +1,53 @@
+{{ today }}
+
+{{ agency.title }}{% if agency.agency and agency.agency != agency.title %}, {{ agency.agency }}{% endif %}
+
+Attn: FOIA / Public Records Officer
+
+Re: {{ j.short }} request — {{ subject }} [{{ token }}]
+
+Dear Records Officer:
+
+Pursuant to {{ j.law }}, I request copies of the following records:
+
+{{ description }}
+
+I request that responsive records be provided electronically, in their native format where available (e.g., email as .eml/.msg, spreadsheets as .xlsx/.csv), by email or download link.
+{% if fee_category %}
+
+For fee purposes, I am {{ fee_label }}.
+{% endif %}
+{% if fee_waiver %}
+
+I request a waiver of all fees. Disclosure of the requested information is in the public interest because it is likely to contribute significantly to public understanding of the operations or activities of the government, and it is not primarily in my commercial interest.{% if fee_waiver_reason %} {{ fee_waiver_reason }}{% endif %}
+
+{% endif %}
+{% if fee_limit is not none %}
+
+If fees are assessed, please notify me before incurring costs in excess of ${{ '%.2f' | format(fee_limit) }}.
+{% endif %}
+{% if expedited %}
+
+I request expedited processing.{% if expedited_reason %} {{ expedited_reason }}{% endif %}
+
+I certify that the foregoing statement is true and correct to the best of my knowledge and belief.
+{% endif %}
+
+If any portion of this request is denied, please cite the specific exemption(s) relied upon, release all reasonably segregable non-exempt material, and advise me of my appeal rights. Please provide records on a rolling basis as they become available.
+{% if j.days %}
+
+I look forward to your response within {{ j.days }} {{ j.unit }} days, as the statute provides.
+{% endif %}
+
+Please reference {{ token }} in all correspondence about this request.
+
+Sincerely,
+
+{{ requester.name }}
+{% if requester.address %}
+{{ requester.address }}
+{% endif %}
+{{ requester.email }}
+{% if requester.phone %}
+{{ requester.phone }}
+{% endif %}
