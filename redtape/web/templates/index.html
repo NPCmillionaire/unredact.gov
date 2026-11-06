@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Cut through the red tape.</h1>
+<p class="lead">Write your members of Congress in two minutes, or file and track public-records requests.</p>
+<div class="card">
+  <h2 style="margin-top:0">Write your senators and representative</h2>
+  <p>Enter your address, write your message, and we deliver it through each office's official channel.
+  {% if s.stripe_ready %}Add a printed, mailed letter for ${{ '%.2f' | format(s.letter_price_cents / 100) }} per office.{% endif %}</p>
+  <a class="btn" href="/congress">Start a message</a>
+</div>
+<div class="card">
+  <h2 style="margin-top:0">FOIA dashboard</h2>
+  <p>Draft statute-correct requests, track deadlines, parse agency replies, and generate follow-ups and appeals.</p>
+  <a class="btn secondary" href="/foia">Open dashboard</a>
+</div>
+{% endblock %}

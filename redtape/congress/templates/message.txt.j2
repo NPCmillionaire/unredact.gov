@@ -1,0 +1,12 @@
+{{ salutation }}
+
+{% for p in paragraphs %}
+{{ p }}
+
+{% endfor %}
+Sincerely,
+{{ c.full_name }}
+{{ c.street }}{% if c.street2 %}, {{ c.street2 }}{% endif %}
+
+{{ c.city }}, {{ c.state }} {{ c.zip5 }}
+{{ c.email }}

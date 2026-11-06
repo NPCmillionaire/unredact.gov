@@ -1,0 +1,31 @@
+{{ today }}
+
+{{ agency.title }}
+Attn: FOIA Appeals Officer
+
+Re: {{ j.short }} APPEAL — request {{ token }}{% if tracking_number %} (no. {{ tracking_number }}){% endif %}
+
+Dear Appeals Officer:
+
+I appeal the {% if constructive %}agency's failure to respond within the statutory time limit to{% else %}determination on{% endif %} my request submitted {{ submitted }} under {{ j.law }}, which sought:
+
+{{ description }}
+{% if grounds %}
+
+Grounds for appeal:
+
+{{ grounds }}
+{% else %}
+
+I ask that you (1) conduct a search reasonably calculated to uncover all responsive records, (2) release all records withheld without a specific, properly-invoked exemption, and (3) release all reasonably segregable non-exempt portions of any record withheld in part.
+{% endif %}
+
+Please reference {{ token }} in your response.
+
+Sincerely,
+
+{{ requester.name }}
+{% if requester.address %}
+{{ requester.address }}
+{% endif %}
+{{ requester.email }}

@@ -1,0 +1,10 @@
+[Unit]
+Description=redtape daily FOIA tick (poll inbox, follow up on overdue requests)
+
+[Service]
+Type=oneshot
+User=redtape
+WorkingDirectory=/opt/redtape
+EnvironmentFile=/opt/redtape/.env
+Environment=REDTAPE_DATA_DIR=/var/lib/redtape
+ExecStart=/opt/redtape/.venv/bin/redtape foia tick --send

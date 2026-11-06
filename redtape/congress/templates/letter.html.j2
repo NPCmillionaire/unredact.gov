@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: 8.5in 11in; margin: 0; }
+  body { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: 11.5pt; line-height: 1.45; color: #111; }
+  .page { padding: 0.75in 1in 0.9in 1in; }
+  /* Lob prints the address block on the top of page 1 (address_placement=top_first_page):
+     keep the top ~3.4in clear. */
+  .address-clear { height: 3.4in; }
+  .sender { text-align: right; font-size: 10pt; margin-bottom: 0.25in; }
+  .date { margin-bottom: 0.2in; }
+  .re { font-weight: bold; margin-bottom: 0.2in; }
+  p { margin: 0 0 0.14in 0; }
+  .sig { margin-top: 0.3in; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="address-clear"></div>
+  <div class="sender">
+    {{ c.full_name }}<br>
+    {{ c.street }}{% if c.street2 %}, {{ c.street2 }}{% endif %}<br>
+    {{ c.city }}, {{ c.state }} {{ c.zip5 }}<br>
+    {{ c.email }}{% if c.phone %}<br>{{ c.phone }}{% endif %}
+  </div>
+  <div class="date">{{ today }}</div>
+  <div class="re">Re: {{ subject }}</div>
+  <p>{{ salutation }}</p>
+  {% for p in paragraphs %}
+  <p>{{ p }}</p>
+  {% endfor %}
+  <div class="sig">
+    <p>Sincerely,</p>
+    <p>{{ c.full_name }}<br><span style="font-size:9.5pt">Constituent, {{ c.city }}, {{ c.state }}</span></p>
+  </div>
+</div>
+</body>
+</html>

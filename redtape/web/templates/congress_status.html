@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Status · redtape{% endblock %}
+{% block head %}{% if pending %}<meta http-equiv="refresh" content="4">{% endif %}{% endblock %}
+{% block body %}
+<h1>Delivery status</h1>
+{% if paid %}<div class="note">Payment received — your letters are being printed.</div>{% endif %}
+{% if canceled %}<div class="error">Checkout was canceled; printed letters were not sent. Electronic messages are unaffected.</div>{% endif %}
+<table>
+  <tr><th>Recipient</th><th>Type</th><th>Status</th><th>Details</th></tr>
+  {% for r in rows %}
+  <tr>
+    <td>{{ 'Sen.' if r.chamber == 'sen' else 'Rep.' }} {{ r.member_name }}</td>
+    <td>{{ 'Printed letter' if r.kind == 'letter' else 'Electronic' }}</td>
+    <td><span class="pill {{ r.status }}">{{ r.status.replace('_', ' ') }}</span></td>
+    <td class="muted">
+      {% if r.status == 'manual' or r.status == 'needs_human' %}
+        This office needs you to submit on their site. <a href="{{ r.contact_form }}" target="_blank" rel="noopener">Open contact form ↗</a>
+        <details><summary>Copy your message</summary><pre>{{ r.body }}</pre></details>
+      {% elif r.error %}{{ r.error }}{% elif r.external_id %}ref {{ r.external_id }}{% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+<p class="muted">Bookmark this page to check back.</p>
+{% endblock %}
