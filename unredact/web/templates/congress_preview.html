@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Preview · unredact{% endblock %}
+{% block body %}
+<h1>Review &amp; send</h1>
+<p class="lead">{{ g.matched_address }} — {{ g.state }}{% if g.district %}-{{ '%02d' | format(g.district) }}{% else %} (at-large){% endif %}</p>
+<form method="post" action="/congress/send">
+  {% for k in ['prefix','first','last','email','phone','subject','body','topic'] %}
+  <input type="hidden" name="{{ k }}" value="{{ f[k] }}">
+  {% endfor %}
+  {% for k in ['street','city','state','zip5','lat','lon'] %}
+  <input type="hidden" name="{{ k }}" value="{{ c[k] if c[k] is not none else '' }}">
+  {% endfor %}
+
+  {% for m, text in previews %}
+  <div class="card">
+    <label class="check"><input type="checkbox" name="bioguide" value="{{ m.bioguide }}" checked>
+      <span><strong>{{ 'Sen.' if m.chamber == 'sen' else 'Rep.' }} {{ m.name }}</strong> <span class="muted">({{ m.party }})</span></span></label>
+    <details><summary class="muted">Preview message</summary><pre>{{ text }}</pre></details>
+  </div>
+  {% endfor %}
+
+  {% if s.stripe_ready %}
+  <div class="card">
+    <label class="check"><input type="checkbox" name="mail" value="1">
+      <span><strong>Also mail a printed letter</strong> — ${{ '%.2f' | format(s.letter_price_cents / 100) }} per office, USPS First-Class to each member's local office.
+      <br><span class="muted">Mail to Washington is screened and can take weeks, so letters go to the district/state office. Typical delivery is 3–7 business days.</span></span></label>
+  </div>
+  {% endif %}
+  <p class="muted">By sending, you confirm you are the person named above and wrote or approved this message.</p>
+  <button type="submit">Send</button>
+  <a class="btn secondary" href="javascript:history.back()">Edit</a>
+</form>
+{% endblock %}

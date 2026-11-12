@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Account · unredact.me{% endblock %}
+{% block body %}
+<h1>Your requester profile</h1>
+{% if welcome %}<div class="note">Welcome! Fill this in once. It's how your letters are signed. Agencies reply to your request's
+unredact.me address, not your personal email, and we forward everything to you.</div>{% endif %}
+{% if saved %}<div class="note">Saved.</div>{% endif %}
+<form method="post" action="/account">
+  <label>Full name</label><input type="text" name="name" value="{{ u.name }}">
+  <div class="row2">
+    <div><label>Phone (optional, appears on letters)</label><input type="tel" name="phone" value="{{ u.phone }}"></div>
+    <div><label>Organization / outlet (optional)</label><input type="text" name="organization" value="{{ u.organization }}"></div>
+  </div>
+  <label>Mailing address (some agencies require one; also used to find your members of Congress)</label>
+  <textarea name="address" style="min-height:80px">{{ u.address }}</textarea>
+  <label>Default fee category</label>
+  <select name="fee_category">
+    {% for v, l in [('', '(none)'), ('other', 'All other / general public'), ('media', 'News media'), ('educational', 'Educational'), ('scientific', 'Noncommercial scientific'), ('commercial', 'Commercial')] %}
+    <option value="{{ v }}" {% if (u.fee_category or '') == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+  </select>
+  <button type="submit">Save</button>
+</form>
+<p class="muted">Signed in as {{ u.email }} · plan: {{ u.plan }}</p>
+{% endblock %}

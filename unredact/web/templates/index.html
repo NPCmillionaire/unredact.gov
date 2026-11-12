@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>File it. Chase it. Read what they hid.</h1>
+<p class="lead">unredact.me files public-records requests for you, follows up when agencies blow their deadlines,
+x-rays released documents for redactions that don't actually redact, and builds the packet you need if it ends up in court.</p>
+<div class="grid3">
+  <div class="card"><strong>1. File</strong><p class="muted">Statute-correct letters to federal, state and local agencies, with fee waiver and expedited-processing language built in.</p></div>
+  <div class="card"><strong>2. Chase</strong><p class="muted">Every reply is read and classified. Overdue? We follow up automatically, then help you appeal or get your members of Congress involved.</p></div>
+  <div class="card"><strong>3. Unredact</strong><p class="muted">Released PDFs are scanned for black boxes drawn over text that's still in the file.</p></div>
+</div>
+<p>{% if user %}<a class="btn" href="/foia/new">New request</a> <a class="btn secondary" href="/foia">My requests</a>
+{% else %}<a class="btn" href="/signup">Start a request, free</a> <a class="btn secondary" href="/congress">Write Congress</a>{% endif %}</p>
+{% if recent %}
+<h2>Recent public requests</h2>
+<table>
+  {% for r in recent %}<tr><td><a href="/r/{{ r.slug }}">{{ r.subject }}</a></td><td class="muted">{{ r.agency_title }}</td>
+  <td><span class="pill {{ r.status }}">{{ r.status }}</span></td></tr>{% endfor %}
+</table>
+{% endif %}
+<div class="card" style="margin-top:28px">
+  <h2 style="margin-top:0">Write your senators and representative</h2>
+  <p>Enter your address, write your message, and we deliver it through each office's official channel.
+  {% if s.stripe_ready %}Add a printed, mailed letter for ${{ '%.2f' | format(s.letter_price_cents / 100) }} per office.{% endif %}</p>
+  <a class="btn secondary" href="/congress">Start a message</a>
+</div>
+{% endblock %}

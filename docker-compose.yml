@@ -1,0 +1,16 @@
+services:
+  web:
+    build: .
+    env_file: .env
+    ports: ["8000:8000"]
+    volumes: ["unredact-data:/data"]
+    restart: unless-stopped
+  # daily job: poll IMAP (if configured) + automatic follow-ups on overdue requests
+  tick:
+    build: .
+    env_file: .env
+    volumes: ["unredact-data:/data"]
+    entrypoint: ["sh", "-c", "while true; do unredact foia tick --send; sleep 86400; done"]
+    restart: unless-stopped
+volumes:
+  unredact-data:

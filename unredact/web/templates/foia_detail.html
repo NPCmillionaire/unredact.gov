@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}{{ r.token }} · unredact.me{% endblock %}
+{% block body %}
+<h1>{{ r.subject }}</h1>
+<p class="lead">{{ r.token }} · {{ a.title }} · <span class="pill {{ r.status }}">{{ r.status }}</span>
+  {% if r.due_at %} · due {{ r.due_at }}{% endif %}{% if r.tracking_number %} · agency no. {{ r.tracking_number }}{% endif %}
+  {% if r.public %} · <a href="/r/{{ r.slug }}">public page</a>{% endif %}</p>
+{% if msg %}<div class="{{ 'error' if msg.startswith('Error') else 'note' }}">{{ msg }}</div>{% endif %}
+
+{% if leaks %}<div class="error"><strong>X-ray: leaky redactions found.</strong> Released files contain text under the black boxes:
+<ul>{% for e in leaks %}<li>{{ e.detail }}</li>{% endfor %}</ul></div>{% endif %}
+
+{% if r.status != 'draft' %}
+<div class="card">
+  <strong>Can you sue yet?</strong>
+  {% if ex.ripe %}<span class="pill ripe">ripe</span>{% elif ex.ripe is none %}<span class="pill">check state law</span>{% else %}<span class="pill">not yet</span>{% endif %}
+  <p style="margin:6px 0 0">{{ ex.why }}</p>
+  <a class="btn secondary" href="/foia/{{ r.id }}/packet.zip">Download lawsuit packet (.zip)</a>
+  <a class="btn secondary" href="/foia/{{ r.id }}/escalate">Ask Congress to intervene</a>
+</div>
+{% endif %}
+
+<h2>Letter</h2>
+<pre>{{ letter }}</pre>
+
+{% if r.status == 'draft' %}
+<form method="post" action="/foia/{{ r.id }}/submit" class="card">
+  <div class="row2">
+    <div><label>Channel</label><select name="channel"><option value="auto">auto (email if possible)</option><option value="email">email</option><option value="manual">I filed it myself (portal / mail)</option></select></div>
+    <div><label>Send to (override)</label><input type="email" name="to" placeholder="{{ a.email or 'foia@agency.gov' }}"></div>
+  </div>
+  <label>Tracking number (manual filings)</label><input type="text" name="tracking">
+  <button type="submit">Submit request</button>
+</form>
+{% else %}
+<div class="grid3">
+  <form method="post" action="/foia/{{ r.id }}/letter" class="card">
+    <input type="hidden" name="kind" value="followup">
+    <strong>Follow up</strong><p class="muted">Status inquiry citing the deadline. Goes to {{ a.email or 'the address you enter' }}.</p>
+    <input type="email" name="to" placeholder="{{ a.email or 'foia@agency.gov' }}">
+    <label class="check"><input type="checkbox" name="send" value="1" checked> Send now (otherwise save as a draft)</label>
+    <button type="submit" class="secondary">Follow up</button>
+  </form>
+  <form method="post" action="/foia/{{ r.id }}/letter" class="card">
+    <input type="hidden" name="kind" value="appeal">
+    <strong>Appeal</strong><p class="muted">Usually goes to a separate appeals office. Check the denial letter.</p>
+    <input type="email" name="to" placeholder="appeals office email">
+    <textarea name="grounds" style="min-height:70px" placeholder="Specific grounds (optional)"></textarea>
+    <label class="check"><input type="checkbox" name="send" value="1"> Send now</label>
+    <button type="submit" class="secondary">Appeal</button>
+  </form>
+  <form method="post" action="/foia/{{ r.id }}/upload" enctype="multipart/form-data" class="card">
+    <strong>Add records</strong><p class="muted">Got documents by mail or portal? Upload them. PDFs are x-rayed for leaky redactions.</p>
+    <input type="file" name="file" required>
+    <button type="submit" class="secondary">Upload</button>
+  </form>
+</div>
+<form method="post" action="/foia/{{ r.id }}/status" class="card">
+  <div class="row2">
+    <div><label>Update status manually</label><select name="status">{% for st in statuses %}<option {% if st == r.status %}selected{% endif %}>{{ st }}</option>{% endfor %}</select></div>
+    <div><label>Agency tracking no.</label><input type="text" name="tracking" value="{{ r.tracking_number or '' }}"></div>
+  </div>
+  <label>Note</label><input type="text" name="note">
+  <button type="submit" class="secondary">Save</button>
+</form>
+{% endif %}
+
+<form method="post" action="/foia/{{ r.id }}/visibility" class="card" style="display:flex;gap:12px;align-items:center">
+  <input type="hidden" name="public" value="{{ '' if r.public else '1' }}">
+  <span>This request is <strong>{{ 'public' if r.public else 'private' }}</strong>.</span>
+  <button type="submit" class="secondary" style="margin:0">Make {{ 'private' if r.public else 'public' }}</button>
+</form>
+
+<h2>Files</h2>
+<table>
+  {% for f in files %}
+  <tr><td><a href="/foia/{{ r.id }}/file/{{ f.event }}/{{ f.i }}">{{ f.name }}</a></td><td class="muted">{{ f.kind }}</td></tr>
+  {% else %}<tr><td class="muted">No files yet. Agency attachments and your uploads show up here.</td></tr>{% endfor %}
+</table>
+
+<h2>Timeline</h2>
+<table>
+  {% for e in events %}
+  <tr><td class="muted" style="white-space:nowrap">{{ e.at }}</td><td><strong>{{ e.kind }}</strong></td><td>{{ e.detail or '' }}</td></tr>
+  {% else %}
+  <tr><td class="muted">No events yet.</td></tr>
+  {% endfor %}
+</table>
+<p class="muted">Agencies reply to {{ s.inbound_address or s.requester_email or 'your inbox' }}. Replies are matched by <code>{{ r.token }}</code>, classified, and x-rayed automatically.</p>
+{% endblock %}

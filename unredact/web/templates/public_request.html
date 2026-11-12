@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}{{ r.subject }} · unredact.me{% endblock %}
+{% block body %}
+<p class="muted">Public records request · {{ r.token }}</p>
+<h1>{{ r.subject }}</h1>
+<p class="lead">To {{ a.title }}{% if a.agency and a.agency != a.title %}, {{ a.agency }}{% endif %} ·
+  <span class="pill {{ r.status }}">{{ r.status }}</span>
+  {% if r.submitted_at %} · filed {{ r.submitted_at }}{% endif %}{% if r.due_at %} · response due {{ r.due_at }}{% endif %}</p>
+{% if leaks %}<div class="error">X-ray found {{ leaks }} file(s) where the agency's redactions still contain recoverable text.</div>{% endif %}
+<h2>Records requested</h2>
+<div class="card" style="white-space:pre-wrap">{{ r.description }}</div>
+<h2>Released files</h2>
+<table>
+  {% for f in files %}<tr><td><a href="/r/{{ r.slug }}/file/{{ f.event }}/{{ f.i }}">{{ f.name }}</a></td></tr>
+  {% else %}<tr><td class="muted">Nothing released yet.</td></tr>{% endfor %}
+</table>
+<h2>Timeline</h2>
+<table>
+  {% for e in events %}<tr><td class="muted" style="white-space:nowrap">{{ e.at[:10] }}</td><td><strong>{{ e.kind }}</strong></td>
+  <td>{% if e.kind.startswith('reply:') or e.kind == 'xray:leak' %}{{ e.detail or '' }}{% endif %}</td></tr>
+  {% endfor %}
+</table>
+<p class="muted" style="margin-top:24px">Filed with <a href="/">unredact.me</a>. <a href="/foia/new">File your own request</a>.</p>
+{% endblock %}

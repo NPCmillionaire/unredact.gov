@@ -1,0 +1,10 @@
+[Unit]
+Description=unredact daily FOIA tick (poll inbox, follow up on overdue requests)
+
+[Service]
+Type=oneshot
+User=unredact
+WorkingDirectory=/opt/unredact
+EnvironmentFile=/opt/unredact/.env
+Environment=UNREDACT_DATA_DIR=/var/lib/unredact
+ExecStart=/opt/unredact/.venv/bin/unredact foia tick --send

@@ -1,0 +1,18 @@
+[Unit]
+Description=unredact web app
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=unredact
+WorkingDirectory=/opt/unredact
+EnvironmentFile=/opt/unredact/.env
+ExecStart=/opt/unredact/.venv/bin/unredact serve --host 127.0.0.1 --port 8000
+Restart=on-failure
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/unredact
+Environment=UNREDACT_DATA_DIR=/var/lib/unredact
+
+[Install]
+WantedBy=multi-user.target

@@ -3,9 +3,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "redtape"
-version = "0.1.0"
-description = "Automate FOIA/public-records requests and constituent messages to Congress (CWC, web forms, email, paid postal letters)."
+name = "unredact"
+version = "0.2.0"
+description = "unredact.me: file, chase and x-ray public-records requests; escalate to Congress (CWC, web forms, paid postal letters)."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
@@ -21,17 +21,19 @@ dependencies = [
   "uvicorn>=0.29",
   "python-multipart>=0.0.9",
   "stripe>=8",
+  "itsdangerous>=2.1",
 ]
 
 [project.optional-dependencies]
 webforms = ["playwright>=1.44"]
-dev = ["pytest>=8"]
+xray = ["pymupdf>=1.23"]
+dev = ["pytest>=8", "pymupdf>=1.23"]
 
 [project.scripts]
-redtape = "redtape.cli:app"
+unredact = "unredact.cli:app"
 
 [tool.hatch.build.targets.wheel]
-packages = ["redtape"]
+packages = ["unredact"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

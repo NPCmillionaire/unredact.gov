@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Sign up' if mode == 'signup' else 'Log in' }} · unredact.me{% endblock %}
+{% block body %}
+<div style="max-width:420px">
+<h1>{{ 'Create your account' if mode == 'signup' else 'Log in' }}</h1>
+{% if error %}<div class="error">{{ error }}</div>{% endif %}
+<form method="post" action="/{{ mode }}">
+  <input type="hidden" name="next" value="{{ next }}">
+  {% if mode == 'signup' %}<label>Full name (signs your letters)</label><input type="text" name="name" autocomplete="name">{% endif %}
+  <label>Email</label><input type="email" name="email" value="{{ email }}" required autocomplete="email">
+  <label>Password{% if mode == 'signup' %} (10+ characters){% endif %}</label>
+  <input type="password" name="password" required minlength="{{ 10 if mode == 'signup' else 1 }}" autocomplete="{{ 'new-password' if mode == 'signup' else 'current-password' }}">
+  <button type="submit">{{ 'Sign up' if mode == 'signup' else 'Log in' }}</button>
+</form>
+<p class="muted">{% if mode == 'signup' %}Have an account? <a href="/login">Log in</a>{% else %}New here? <a href="/signup">Create an account</a>{% endif %}</p>
+</div>
+{% endblock %}
