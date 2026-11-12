@@ -1,12 +1,13 @@
 {% extends "base.html" %}
-{% block title %}New FOIA request · unredact{% endblock %}
+{% block title %}New FOIA request · unredact.me{% endblock %}
 {% block body %}
 <h1>New request</h1>
 {% if not agency %}
 <form method="get" action="/foia/new">
   <label>Find an agency</label>
-  <input type="text" name="q" value="{{ q }}" placeholder="FBI, EPA Region 5, Youngstown police…">
+  <input type="text" name="q" value="{{ q }}" placeholder="FBI, EPA, Youngstown police…">
   <button type="submit">Search</button>
+  <a class="btn secondary" href="/foia/agencies/new">Add a state/local agency</a>
 </form>
 {% for a in results %}
 <div class="card">
@@ -14,14 +15,28 @@
   <span class="muted">email: {{ a.email or '—' }} · portal: {{ a.submission_format or '—' }}</span><br>
   <a class="btn secondary" href="/foia/new?agency={{ a.id }}">Select</a>
 </div>
-{% else %}{% if q %}<p class="muted">No matches. Add state/local agencies with <code>unredact foia agencies add</code>.</p>{% endif %}{% endfor %}
+{% else %}{% if q %}<p class="muted">No matches. <a href="/foia/agencies/new">Add it</a>, since most local offices aren't on FOIA.gov.</p>{% endif %}{% endfor %}
 {% else %}
-<div class="note">To: <strong>{{ agency.title }}</strong> ({{ agency.jurisdiction }}) — {{ agency.email or 'no email on file; you will file manually' }}</div>
+<div class="note">To: <strong>{{ agency.title }}</strong> ({{ agency.jurisdiction }}) · {{ agency.email or 'no email on file; you will file manually' }}</div>
+
+<form method="get" action="/foia/new" style="margin-top:14px">
+  <input type="hidden" name="agency" value="{{ agency.id }}">
+  <label>Start from a template</label>
+  <div style="display:flex;gap:10px;align-items:center">
+    <select name="preset" onchange="this.form.submit()">
+      <option value="">Blank request</option>
+      {% for p in presets %}<option value="{{ p.id }}" {% if p.id == preset %}selected{% endif %}>{{ p.title }}</option>{% endfor %}
+    </select>
+    <noscript><button type="submit" class="secondary" style="margin:0">Load</button></noscript>
+  </div>
+  {% if preset %}<p class="muted">Replace every <code>[BRACKETED]</code> field before creating the request.</p>{% endif %}
+</form>
+
 <form method="post" action="/foia/new">
   <input type="hidden" name="agency_id" value="{{ agency.id }}">
-  <label>Subject</label><input type="text" name="subject" required>
+  <label>Subject</label><input type="text" name="subject" required value="{{ subject }}">
   <label>Records sought</label>
-  <textarea name="description" required placeholder="Be specific: record types, custodians/offices, date range, keywords. E.g. 'All emails sent or received by the Director of X between Jan 1, 2025 and Jun 30, 2025 containing the terms …'"></textarea>
+  <textarea name="description" required style="min-height:260px" placeholder="Be specific: record types, custodians/offices, date range, keywords.">{{ description }}</textarea>
   <div class="row2">
     <div><label>Fee category</label>
       <select name="fee_category"><option value="">(none)</option><option value="media">News media</option><option value="educational">Educational</option>

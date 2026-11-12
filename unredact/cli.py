@@ -40,6 +40,76 @@ def doctor():
     typer.echo(f"web-form defs    {_ok(s.webform_defs_dir.exists())}  {s.webform_defs_dir}")
     typer.echo(f"Lob              {_ok(s.lob_ready)}")
     typer.echo(f"Stripe           {_ok(s.stripe_ready)}  ${s.letter_price_cents / 100:.2f}/letter")
+    typer.echo(f"email verify     {_ok(s.verify_emails)}  (web: constituents confirm before sending)")
+
+
+@app.command()
+def init(
+    sync: bool = typer.Option(True, help="Download agency + Congress data when done"),
+):
+    """Interactive setup: writes ~/.config/unredact/.env and loads data."""
+    from unredact.config import CONFIG_FILE
+
+    existing: dict[str, str] = {}
+    if CONFIG_FILE.exists():
+        from dotenv import dotenv_values
+
+        existing = {k: v or "" for k, v in dotenv_values(CONFIG_FILE).items()}
+        typer.echo(f"Updating {CONFIG_FILE} (Enter keeps the current value)\n")
+
+    def ask(key: str, label: str, secret: bool = False, default: str = "") -> None:
+        cur = existing.get(key, default)
+        shown = ("••••" if cur else "") if secret else cur
+        val = typer.prompt(f"{label}", default=shown, show_default=bool(shown), hide_input=secret)
+        existing[key] = cur if (secret and val == "••••") else val
+
+    typer.secho("Who are you? (appears on FOIA letters)", bold=True)
+    ask("REQUESTER_NAME", "  Full name")
+    ask("REQUESTER_EMAIL", "  Email for agency replies")
+    ask("REQUESTER_ADDRESS", "  Mailing address (city, state is fine)")
+    ask("REQUESTER_PHONE", "  Phone (optional)")
+
+    if typer.confirm("\nSet up outgoing email (to send requests automatically)?", default=bool(existing.get("SMTP_HOST"))):
+        ask("SMTP_HOST", "  SMTP host (e.g. smtp.fastmail.com)")
+        ask("SMTP_PORT", "  SMTP port", default="587")
+        ask("SMTP_USER", "  SMTP username", default=existing.get("REQUESTER_EMAIL", ""))
+        ask("SMTP_PASSWORD", "  SMTP password / app password", secret=True)
+        existing.setdefault("SMTP_FROM", f"{existing.get('REQUESTER_NAME', '')} <{existing.get('REQUESTER_EMAIL', '')}>")
+        ask("SMTP_FROM", "  From header", default=existing["SMTP_FROM"])
+        if typer.confirm("  Read agency replies from the same mailbox (IMAP)?", default=True):
+            host = existing.get("IMAP_HOST") or existing["SMTP_HOST"].replace("smtp", "imap", 1)
+            ask("IMAP_HOST", "  IMAP host", default=host)
+            existing.setdefault("IMAP_USER", existing.get("SMTP_USER", ""))
+            existing.setdefault("IMAP_PASSWORD", existing.get("SMTP_PASSWORD", ""))
+
+    typer.secho("\nFOIA.gov API key — free at https://www.foia.gov/developer/ (Enter to skip)", bold=True)
+    ask("FOIA_GOV_API_KEY", "  API key", secret=True)
+
+    if typer.confirm("\nSet up paid printed letters (Lob + Stripe)?", default=bool(existing.get("LOB_API_KEY"))):
+        ask("LOB_API_KEY", "  Lob API key (test_… keys mail nothing)", secret=True)
+        ask("STRIPE_SECRET_KEY", "  Stripe secret key (optional)", secret=True)
+        ask("STRIPE_WEBHOOK_SECRET", "  Stripe webhook secret (optional)", secret=True)
+        ask("LETTER_PRICE_CENTS", "  Price per letter in cents", default="300")
+
+    CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)
+    def q(v: str) -> str:
+        return '"' + v.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n") + '"'
+
+    lines = [f"{k}={q(v)}" for k, v in existing.items() if v not in (None, "")]
+    CONFIG_FILE.write_text("\n".join(lines) + "\n")
+    CONFIG_FILE.chmod(0o600)
+    typer.secho(f"\n✓ saved {CONFIG_FILE}", fg="green")
+
+    get_settings.cache_clear()
+    if sync:
+        typer.echo("Downloading Congress data…")
+        congress_sync()
+        if get_settings().foia_gov_api_key:
+            typer.echo("Downloading federal agencies…")
+            agencies_sync()
+    typer.echo("")
+    doctor()
+    typer.secho("\nNext: unredact foia presets   ·   unredact congress lookup \"<your address>\"", fg="cyan")
 
 
 @app.command()
@@ -93,10 +163,37 @@ def agencies_add(
     typer.echo(f"added {id}")
 
 
+@foia.command("presets")
+def foia_presets():
+    """List ready-made request templates."""
+    from unredact.foia.presets import presets, user_fields
+
+    for p in presets().values():
+        typer.secho(f"{p['id']:<26}", fg="cyan", nl=False)
+        typer.echo(f"{p['title']}")
+        typer.echo(f"{'':<26}{p['summary']}")
+        typer.echo(f"{'':<26}fields: {', '.join(user_fields(p))}\n")
+
+
+@foia.command("export")
+def foia_export(out: Optional[Path] = typer.Option(None, help="Write CSV here (default: stdout)")):
+    """Export all requests as CSV."""
+    from unredact.foia.tracker import export_csv
+
+    data = export_csv(connect())
+    if out:
+        out.write_text(data)
+        typer.echo(f"wrote {out}")
+    else:
+        typer.echo(data, nl=False)
+
+
 @foia.command("new")
 def foia_new(
     agency: str = typer.Option(..., help="Agency id (see `foia agencies search`)"),
-    subject: str = typer.Option(..., help="Short title"),
+    subject: Optional[str] = typer.Option(None, help="Short title (preset supplies one)"),
+    preset: Optional[str] = typer.Option(None, help="Template id (see `foia presets`)"),
+    var: list[str] = typer.Option([], "--var", help="Preset field, key=value (repeatable)"),
     description: Optional[str] = typer.Option(None, help="Records sought (or use --file)"),
     file: Optional[Path] = typer.Option(None, help="Read description from a file"),
     fee_category: Optional[str] = typer.Option(None, help="media|educational|scientific|commercial|other"),
@@ -115,8 +212,25 @@ def foia_new(
     if not a:
         raise typer.BadParameter(f"unknown agency {agency}")
     desc = file.read_text() if file else description
+    if preset:
+        from unredact.foia import presets as P
+
+        p = P.get(preset)
+        values = dict(kv.split("=", 1) for kv in var if "=" in kv)
+        values["agency_name"] = a["title"]
+        for f in P.user_fields(p):
+            if f not in values:
+                values[f] = typer.prompt(f"  {f.replace('_', ' ')}", default="", show_default=False)
+        psubject, pdesc = P.fill(p, values)
+        subject = subject or psubject
+        desc = desc or pdesc
+        if P.unfilled(subject + desc):
+            typer.secho(f"note: unfilled fields {', '.join(sorted(set(P.unfilled(subject + desc))))} — "
+                        "edit before submitting", fg="yellow")
     if not desc:
-        raise typer.BadParameter("give --description or --file")
+        raise typer.BadParameter("give --description, --file, or --preset")
+    if not subject:
+        raise typer.BadParameter("give --subject")
     req = tracker.create(con, agency_id=agency, subject=subject, description=desc, jurisdiction=a["jurisdiction"],
                          fee_category=fee_category, fee_limit=fee_limit, fee_waiver=fee_waiver,
                          fee_waiver_reason=fee_waiver_reason, expedited=expedited, expedited_reason=expedited_reason)

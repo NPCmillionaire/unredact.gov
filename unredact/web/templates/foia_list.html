@@ -1,9 +1,17 @@
 {% extends "base.html" %}
-{% block title %}FOIA · unredact{% endblock %}
+{% block title %}FOIA · unredact.me{% endblock %}
 {% block body %}
-<div style="display:flex;justify-content:space-between;align-items:center">
-  <h1>FOIA requests</h1><a class="btn" href="/foia/new" style="margin:0">New request</a>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+  <h1>FOIA requests</h1>
+  <div style="display:flex;gap:8px;align-items:center">
+    {% if s.imap_ready %}
+    <form method="post" action="/foia/poll" style="margin:0"><button class="secondary" style="margin:0">Check inbox</button></form>
+    {% endif %}
+    <a class="btn secondary" href="/foia/export.csv" style="margin:0">Export CSV</a>
+    <a class="btn" href="/foia/new" style="margin:0">New request</a>
+  </div>
 </div>
+{% if msg %}<div class="note" style="margin:12px 0">{{ msg }}</div>{% endif %}
 <table>
   <tr><th>#</th><th>Token</th><th>Agency</th><th>Subject</th><th>Status</th><th>Due</th></tr>
   {% for r in rows %}
@@ -16,7 +24,7 @@
     <td>{{ r.due_at or '—' }}</td>
   </tr>
   {% else %}
-  <tr><td colspan="6" class="muted">No requests yet.</td></tr>
+  <tr><td colspan="6" class="muted">No requests yet. <a href="/foia/new">File your first one</a> from a template in about a minute.</td></tr>
   {% endfor %}
 </table>
 {% endblock %}

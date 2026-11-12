@@ -58,6 +58,13 @@ class Settings:
     base_url: str
     admin_password: str
     webform_defs_dir: Path
+    require_email_verification: bool = True
+    trust_proxy: bool = False
+    rate_limit_per_hour: int = 20
+
+    @property
+    def verify_emails(self) -> bool:
+        return self.require_email_verification and self.smtp_ready
 
     @property
     def db_path(self) -> Path:
@@ -97,9 +104,15 @@ class Settings:
         return bool(self.stripe_secret_key and self.lob_api_key)
 
 
+CONFIG_DIR = Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config") / "unredact"
+CONFIG_FILE = CONFIG_DIR / ".env"
+
+
 @lru_cache
 def get_settings() -> Settings:
-    load_dotenv()
+    # ./.env (project checkout) wins, then ~/.config/unredact/.env (written by `unredact init`)
+    load_dotenv(Path.cwd() / ".env")
+    load_dotenv(CONFIG_FILE)
     e = os.environ.get
     data_dir = Path(e("UNREDACT_DATA_DIR") or Path.home() / ".local/share/unredact").expanduser()
     return Settings(
@@ -137,4 +150,7 @@ def get_settings() -> Settings:
         base_url=e("BASE_URL", "http://127.0.0.1:8000").rstrip("/"),
         admin_password=e("UNREDACT_ADMIN_PASSWORD", ""),
         webform_defs_dir=Path(e("WEBFORM_DEFS_DIR") or data_dir / "contact-congress" / "members").expanduser(),
+        require_email_verification=_bool(e("REQUIRE_EMAIL_VERIFICATION"), True),
+        trust_proxy=_bool(e("UNREDACT_TRUST_PROXY"), False),
+        rate_limit_per_hour=int(e("RATE_LIMIT_PER_HOUR", "20")),
     )

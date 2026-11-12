@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ r.token }} · unredact{% endblock %}
+{% block title %}{{ r.token }} · unredact.me{% endblock %}
 {% block body %}
 <h1>{{ r.subject }}</h1>
 <p class="lead">{{ r.token }} · {{ a.title }} · <span class="pill {{ r.status }}">{{ r.status }}</span>
@@ -26,7 +26,14 @@
   </div>
   <button type="submit" class="secondary">Save</button>
 </form>
-<p class="muted">Follow-ups and appeals: <code>unredact foia followup {{ r.id }} --send</code> · <code>unredact foia appeal {{ r.id }} --to appeals@agency.gov --send</code></p>
+<div class="card">
+  <strong>Push it along</strong>
+  <form method="post" action="/foia/{{ r.id }}/followup" style="display:flex;gap:10px;align-items:flex-end;margin-top:6px">
+    <div style="flex:1"><label>Status inquiry to</label><input type="email" name="to" placeholder="{{ a.email or 'agency email' }}"></div>
+    <button type="submit" class="secondary" style="margin:0">Send follow-up</button>
+  </form>
+  <a class="btn secondary" href="/foia/{{ r.id }}/appeal">Draft an appeal →</a>
+</div>
 {% endif %}
 
 <h2>Timeline</h2>

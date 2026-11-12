@@ -117,6 +117,20 @@ def overdue(con: sqlite3.Connection, today: dt.date | None = None) -> list[dict]
     return [dict(r) for r in rows]
 
 
+def export_csv(con: sqlite3.Connection) -> str:
+    import csv
+    import io
+
+    cols = ["id", "token", "status", "agency_title", "jurisdiction", "subject", "tracking_number",
+            "channel", "submitted_at", "due_at", "created_at"]
+    buf = io.StringIO()
+    w = csv.DictWriter(buf, fieldnames=cols, extrasaction="ignore")
+    w.writeheader()
+    for r in list_requests(con):
+        w.writerow(r)
+    return buf.getvalue()
+
+
 def last_event_at(con: sqlite3.Connection, req_id: int, kind: str) -> dt.datetime | None:
     r = con.execute(
         "SELECT at FROM foia_events WHERE request_id=? AND kind=? ORDER BY id DESC LIMIT 1", (req_id, kind)

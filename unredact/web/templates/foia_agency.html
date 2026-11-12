@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Add agency · unredact.me{% endblock %}
+{% block body %}
+<h1>Add a state or local agency</h1>
+<p class="lead">Police departments, school districts, city and county offices: anything not listed on FOIA.gov.</p>
+<form method="post" action="/foia/agencies/new">
+  <div class="row2">
+    <div><label>Short id</label><input type="text" name="id" required placeholder="oh-youngstown-police"></div>
+    <div><label>Jurisdiction</label><input type="text" name="jurisdiction" required placeholder="OH (two-letter state) or federal" maxlength="7"></div>
+  </div>
+  <label>Agency name</label><input type="text" name="title" required placeholder="Youngstown Police Department">
+  <label>Parent body (optional)</label><input type="text" name="parent" placeholder="City of Youngstown">
+  <div class="row2">
+    <div><label>Records email</label><input type="email" name="email"></div>
+    <div><label>Portal / website</label><input type="text" name="website" placeholder="https://…"></div>
+  </div>
+  <button type="submit">Add &amp; start a request →</button>
+</form>
+{% endblock %}

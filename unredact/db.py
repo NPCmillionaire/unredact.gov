@@ -110,6 +110,15 @@ CREATE TABLE IF NOT EXISTS messages (
   sent_at TEXT
 );
 CREATE INDEX IF NOT EXISTS messages_batch ON messages(batch);
+
+CREATE TABLE IF NOT EXISTS verifications (
+  token TEXT PRIMARY KEY,
+  batch TEXT NOT NULL,
+  email TEXT NOT NULL,
+  order_id INTEGER REFERENCES orders(id),
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  verified_at TEXT
+);
 """
 
 

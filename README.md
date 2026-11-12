@@ -63,24 +63,65 @@ Persistence is what gets results here, and persistence is easy to automate. **un
 | **Paper mail, built in** | Optional printed letters through Lob, sent USPS First-Class to the member's **nearest district office**. Mail to D.C. gets irradiated and can take weeks. |
 | **Ready to charge for** | Stripe Checkout with signature-verified webhooks and idempotent print jobs. Run it as a public site and charge per letter. |
 
-## Quickstart
+## Install
+
+One line, macOS or Linux. You need Python 3.10+ and git.
 
 ```bash
-gh repo clone NPCmillionaire/unredact.me && cd unredact.me
-python -m venv .venv && . .venv/bin/activate
-pip install -e .                       # add '[webforms]' for Playwright form-filling
-cp .env.example .env                   # your name, SMTP/IMAP, API keys
-unredact doctor                        # shows what's connected and what's missing
+curl -fsSL https://raw.githubusercontent.com/NPCmillionaire/unredact.me/main/install.sh | bash
+```
 
-unredact foia agencies sync            # federal agencies, from FOIA.gov
-unredact congress sync                 # current Congress + ~1,300 district offices
+The installer creates an isolated environment, puts `unredact` on your PATH, then starts **`unredact init`**: a short wizard that asks for your name, email and optional API keys, saves them to `~/.config/unredact/.env`, and downloads the agency and Congress data. You never edit a config file by hand.
+
+<details>
+<summary>Other ways to install</summary>
+
+```bash
+# with web-form autofill (Playwright + headless Chromium)
+curl -fsSL https://raw.githubusercontent.com/NPCmillionaire/unredact.me/main/install.sh | bash -s -- --web-forms
+
+# pipx
+pipx install git+https://github.com/NPCmillionaire/unredact.me && unredact init
+
+# Docker (web app + daily FOIA job)
+git clone https://github.com/NPCmillionaire/unredact.me && cd unredact.me
+cp .env.example .env && docker compose up -d
+
+# from source (development)
+git clone https://github.com/NPCmillionaire/unredact.me && cd unredact.me
+./install.sh --local
+
+# uninstall (keeps your config and data)
+curl -fsSL https://raw.githubusercontent.com/NPCmillionaire/unredact.me/main/install.sh | bash -s -- --uninstall
+```
+</details>
+
+## Templates: good requests without the legalese
+
+Specific requests get answered; vague ones get stalled. unredact.me ships with **11 request templates** written the way experienced requesters write them:
+
+| | |
+|---|---|
+| `police-use-of-force` | Use-of-force reports, aggregate data and the governing policy |
+| `body-camera` | Body/dash-cam video, CAD logs and reports for one incident |
+| `official-emails` | A named official's emails containing your keywords |
+| `official-calendar` | Who an official met with, and when |
+| `contracts` | Contracts, invoices, bids and scoring sheets for a vendor |
+| `surveillance-tech` | ALPR / camera / facial-recognition contracts, policies, sharing deals and audit logs |
+| `foia-log` | The agency's own log of every request it received. The best story-finder there is. |
+| `inspections` · `complaints` · `purchase-cards` · `communications-with-org` | …and more |
+
+```bash
+unredact foia presets
+unredact foia new --agency oh-ytown-pd --preset police-use-of-force \
+  --var start="January 1, 2025" --var end="October 31, 2026"
 ```
 
 ## The 60-second workflow
 
 ```bash
 # 1 · Ask
-unredact foia new --agency <id> --subject "…" --file ask.txt
+unredact foia new --agency <id> --preset foia-log      # or --subject "…" --file ask.txt
 
 # 2 · Send
 unredact foia submit 1                 # or --channel manual --tracking ABC123 for portal filings
@@ -106,8 +147,8 @@ unredact foia agencies add --id oh-ytown-pd --title "Youngstown Police Departmen
 unredact serve --host 0.0.0.0
 ```
 
-- **`/congress`** — public flow: enter address → preview each message → send → live status page, with optional paid printed letters.
-- **`/foia`** — your private dashboard: requests, deadlines, letter text and a full timeline of every reply. Protected by `UNREDACT_ADMIN_PASSWORD`, and localhost-only if that isn't set.
+- **`/congress`** — public flow: enter address → preview each message → **confirm by email** → delivered, with a live status page and optional paid printed letters. Per-IP rate limits are built in.
+- **`/foia`** — your private dashboard: start from a template, add local agencies, one-click follow-ups, an appeal editor, a "check inbox" button, CSV export and a full timeline of every reply. Protected by `UNREDACT_ADMIN_PASSWORD`, and localhost-only if that isn't set.
 
 ## Under the hood
 
@@ -138,7 +179,7 @@ One SQLite file holds everything. There is no ORM, no queue server and no JS bui
 unredact.me exists to amplify **real people**, not to impersonate them.
 
 - Every FOIA request goes out under a real requester's name and email.
-- Every congressional message needs a real constituent address. Offices check.
+- Every congressional message needs a real constituent address and a **confirmed email** before anything is sent. Offices check.
 - The same person can't send the same subject to the same office twice within 24 hours.
 - Fee estimates are **never** auto-accepted.
 - No CAPTCHA solving, no IP rotation, no astroturf.

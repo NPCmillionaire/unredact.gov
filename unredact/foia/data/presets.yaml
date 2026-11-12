@@ -1,0 +1,98 @@
+# Ready-made request language. {placeholders} are filled from --var key=value (CLI) or edited in the web form.
+# {agency_name} is filled automatically from the selected agency.
+# Good requests are specific: who holds the records, what kind, which dates, which keywords.
+
+- id: police-use-of-force
+  title: Police use-of-force reports
+  summary: Use-of-force reports, aggregate data, and the governing policy for a date range.
+  subject: "Use-of-force records, {start} to {end}"
+  description: |
+    1. All use-of-force reports, response-to-resistance reports, or equivalent records documenting the use of force by officers of {agency_name}, created between {start} and {end}.
+    2. Any summary statistics, annual reports, dashboards, or data exports of use-of-force incidents covering the same period.
+    3. The use-of-force policy or general order in effect during that period, including all revisions.
+
+    Identifying information of private individuals may be redacted; please release all remaining portions.
+
+- id: body-camera
+  title: Body-worn / dash camera footage of an incident
+  summary: Video, CAD logs, and reports for one specific incident.
+  subject: "Video and records of incident on {date} at {location}"
+  description: |
+    Regarding the incident on {date} at or near {location} (report/incident number, if known: {report_number}):
+    1. All body-worn camera and in-car (dash) camera recordings from every officer present.
+    2. The incident report, supplemental reports, and computer-aided dispatch (CAD) log and audio.
+    3. Any use-of-force or pursuit reports associated with the incident.
+
+- id: official-emails
+  title: An official's emails on a topic
+  summary: Emails to/from a named official containing specific keywords in a date range.
+  subject: "Emails of {official} regarding {keywords}, {start} to {end}"
+  description: |
+    All emails, including attachments, sent or received by {official} ({role}) between {start} and {end} that contain any of the following terms: {keywords}.
+
+    Please search all accounts used to conduct agency business, including any personal accounts or devices, and produce records in native format (.eml/.msg) with full headers where possible.
+
+- id: official-calendar
+  title: An official's calendar
+  summary: Calendars, schedules, and meeting logs for a named official.
+  subject: "Calendar of {official}, {start} to {end}"
+  description: |
+    The calendar(s), daily schedules, and meeting logs of {official} ({role}) for the period {start} through {end}, including entries showing meeting participants, locations, and subjects.
+
+- id: contracts
+  title: Contracts with a vendor
+  summary: Contracts, amendments, invoices, and payments involving a vendor.
+  subject: "Contracts and payments involving {vendor}"
+  description: |
+    For the period {start} through {end}, all records reflecting the agency's relationship with {vendor}, including:
+    1. Contracts, purchase orders, amendments, renewals, and change orders.
+    2. Invoices and records of payments made.
+    3. Solicitations (RFPs/RFQs/bids), the vendor's response, and evaluation or scoring sheets.
+    4. Any memoranda of understanding or data-sharing agreements.
+
+- id: surveillance-tech
+  title: Surveillance technology (ALPR, cameras, facial recognition)
+  summary: Contracts, policies, sharing agreements, and usage data for a surveillance system.
+  subject: "Records about {technology}"
+  description: |
+    Records relating to the agency's acquisition and use of {technology} from {start} through {end}:
+    1. Contracts, quotes, invoices, grant applications, and purchase approvals.
+    2. Policies, general orders, or training materials governing its use, retention, and access.
+    3. Agreements to share data with other agencies, vendors, or third parties, and lists of entities granted access.
+    4. Audit logs or reports showing the number of queries or searches performed, by month.
+    5. Data retention schedules applying to the data collected.
+
+- id: foia-log
+  title: The agency's own FOIA request log
+  summary: "Meta-request — every records request the agency received. Great for finding stories."
+  subject: "Public records request log, {start} to {end}"
+  description: |
+    A copy of the log, spreadsheet, or database export tracking public records / FOIA requests received by {agency_name} between {start} and {end}, including for each request: the date received, requester name or organization (private individuals may be redacted), a description of the records sought, the current status, and the date closed. Electronic (.csv/.xlsx) format preferred.
+
+- id: inspections
+  title: Inspection reports for a facility
+  summary: Health, building, fire, or safety inspections and violations for one facility.
+  subject: "Inspection records for {facility}"
+  description: |
+    All inspection reports, violation notices, complaints, correspondence, and enforcement records concerning {facility} located at {address}, from {start} through {end}.
+
+- id: complaints
+  title: Complaints about a business or person
+  summary: Complaints received and the agency's response.
+  subject: "Complaints regarding {subject_name}"
+  description: |
+    All complaints received by {agency_name} regarding {subject_name} between {start} and {end}, together with records of any investigation, response, or disposition of those complaints. Identifying information of complainants who are private individuals may be redacted.
+
+- id: purchase-cards
+  title: Agency credit card spending
+  summary: Purchasing/procurement card statements and receipts.
+  subject: "Purchasing card statements, {start} to {end}"
+  description: |
+    Monthly statements, transaction logs, and receipts for all purchasing cards (p-cards), credit cards, or travel cards issued to {agency_name} employees or officials, for the period {start} through {end}. A transaction-level export (.csv/.xlsx) is preferred.
+
+- id: communications-with-org
+  title: Communications with an outside organization
+  summary: Emails and letters between the agency and a named company or group.
+  subject: "Communications with {organization} regarding {topic}"
+  description: |
+    All communications (emails, letters, text messages, and meeting notes) between employees or officials of {agency_name} and any representative of {organization}, regarding {topic}, from {start} through {end}.

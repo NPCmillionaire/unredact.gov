@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Preview · unredact{% endblock %}
+{% block title %}Preview · unredact.me{% endblock %}
 {% block body %}
 <h1>Review &amp; send</h1>
 <p class="lead">{{ g.matched_address }} — {{ g.state }}{% if g.district %}-{{ '%02d' | format(g.district) }}{% else %} (at-large){% endif %}</p>

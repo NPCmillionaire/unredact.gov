@@ -1,8 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Status · unredact{% endblock %}
+{% block title %}Status · unredact.me{% endblock %}
 {% block head %}{% if pending %}<meta http-equiv="refresh" content="4">{% endif %}{% endblock %}
 {% block body %}
 <h1>Delivery status</h1>
+{% if unverified %}<div class="note">📬 <strong>Check your email.</strong> We sent a confirmation link. Nothing is delivered until you click it, which keeps anyone from writing Congress in your name. The link works for 48 hours.</div>{% endif %}
 {% if paid %}<div class="note">Payment received — your letters are being printed.</div>{% endif %}
 {% if canceled %}<div class="error">Checkout was canceled; printed letters were not sent. Electronic messages are unaffected.</div>{% endif %}
 <table>

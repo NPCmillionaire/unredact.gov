@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Appeal {{ r.token }} · unredact.me{% endblock %}
+{% block body %}
+<h1>Appeal {{ r.token }}</h1>
+<p class="lead">{{ a.title }} · current status <span class="pill {{ r.status }}">{{ r.status }}</span></p>
+<div class="note">Appeals usually go to a different office than the original request. Check the agency's determination letter or FOIA regulations for the appeals address and deadline (federal: 90 days).</div>
+<form method="post" action="/foia/{{ r.id }}/appeal">
+  <label>Appeals office email</label><input type="email" name="to" required>
+  <label>Appeal letter (edit freely: add specific grounds, exemptions you dispute, search terms they missed)</label>
+  <textarea name="body" style="min-height:420px">{{ body }}</textarea>
+  <button type="submit">Send appeal</button>
+  <a class="btn secondary" href="/foia/{{ r.id }}">Cancel</a>
+</form>
+{% endblock %}
