@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{{ r.token }} · unredact{% endblock %}
+{% block body %}
+<h1>{{ r.subject }}</h1>
+<p class="lead">{{ r.token }} · {{ a.title }} · <span class="pill {{ r.status }}">{{ r.status }}</span>
+  {% if r.due_at %} · due {{ r.due_at }}{% endif %}{% if r.tracking_number %} · agency no. {{ r.tracking_number }}{% endif %}</p>
+{% if msg %}<div class="note">{{ msg }}</div>{% endif %}
+
+<h2>Letter</h2>
+<pre>{{ letter }}</pre>
+
+{% if r.status == 'draft' %}
+<form method="post" action="/foia/{{ r.id }}/submit" class="card">
+  <div class="row2">
+    <div><label>Channel</label><select name="channel"><option value="auto">auto</option><option value="email">email</option><option value="manual">manual (I filed it myself)</option></select></div>
+    <div><label>Send to (override)</label><input type="email" name="to" placeholder="{{ a.email or 'foia@agency.gov' }}"></div>
+  </div>
+  <label>Tracking number (manual filings)</label><input type="text" name="tracking">
+  <button type="submit">Submit request</button>
+</form>
+{% else %}
+<form method="post" action="/foia/{{ r.id }}/status" class="card">
+  <div class="row2">
+    <div><label>Update status</label><select name="status">{% for st in statuses %}<option {% if st == r.status %}selected{% endif %}>{{ st }}</option>{% endfor %}</select></div>
+    <div><label>Note</label><input type="text" name="note"></div>
+  </div>
+  <button type="submit" class="secondary">Save</button>
+</form>
+<p class="muted">Follow-ups and appeals: <code>unredact foia followup {{ r.id }} --send</code> · <code>unredact foia appeal {{ r.id }} --to appeals@agency.gov --send</code></p>
+{% endif %}
+
+<h2>Timeline</h2>
+<table>
+  {% for e in events %}
+  <tr><td class="muted" style="white-space:nowrap">{{ e.at }}</td><td><strong>{{ e.kind }}</strong></td><td>{{ e.detail or '' }}{% if e.attachment %}<br><span class="muted">📎 {{ e.attachment }}</span>{% endif %}</td></tr>
+  {% else %}
+  <tr><td class="muted">No events yet.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

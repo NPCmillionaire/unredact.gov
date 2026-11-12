@@ -2,8 +2,8 @@ from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
-from redtape.congress.geo import GeoResult
-from redtape.web.app import app
+from unredact.congress.geo import GeoResult
+from unredact.web.app import app
 
 client = TestClient(app)
 GEO = GeoResult("100 W FEDERAL ST, YOUNGSTOWN, OH, 44503", "100 W FEDERAL ST", "YOUNGSTOWN", "OH", "44503", 6, 41.1, -80.65)
@@ -19,7 +19,7 @@ def test_pages_render(seeded):
 
 
 def test_congress_flow(seeded):
-    with patch("redtape.congress.geo.geocode", return_value=GEO):
+    with patch("unredact.congress.geo.geocode", return_value=GEO):
         r = client.post("/congress/preview", data={**FORM, "address": "100 W Federal St, Youngstown OH"})
     assert r.status_code == 200 and "Bob Rep" in r.text and "Ann Senator" in r.text
     data = {**FORM, "street": GEO.street, "city": GEO.city, "state": "OH", "zip5": "44503", "lat": "41.1",

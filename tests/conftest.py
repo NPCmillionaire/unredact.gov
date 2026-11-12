@@ -1,11 +1,11 @@
 import pytest
 
-from redtape.config import get_settings
+from unredact.config import get_settings
 
 
 @pytest.fixture(autouse=True)
 def env(tmp_path, monkeypatch):
-    monkeypatch.setenv("REDTAPE_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("UNREDACT_DATA_DIR", str(tmp_path))
     monkeypatch.setenv("REQUESTER_NAME", "Test Requester")
     monkeypatch.setenv("REQUESTER_EMAIL", "req@example.com")
     for k in ("SMTP_HOST", "SMTP_FROM", "CWC_API_KEY", "LOB_API_KEY", "STRIPE_SECRET_KEY", "GEOCODIO_API_KEY"):
@@ -17,7 +17,7 @@ def env(tmp_path, monkeypatch):
 
 @pytest.fixture
 def con():
-    from redtape.db import connect
+    from unredact.db import connect
 
     c = connect()
     yield c
@@ -26,8 +26,8 @@ def con():
 
 @pytest.fixture
 def seeded(con):
-    from redtape.congress.directory import load_members, load_offices
-    from redtape.foia.directory import upsert
+    from unredact.congress.directory import load_members, load_offices
+    from unredact.foia.directory import upsert
 
     upsert(con, id="fbi", title="Federal Bureau of Investigation", abbreviation="FBI",
            agency="Department of Justice", email="foia@fbi.example", jurisdiction="federal")
